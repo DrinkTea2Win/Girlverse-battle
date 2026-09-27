@@ -1,0 +1,8 @@
+/* Girlverse theme layer — intentionally small; gameplay remains JavaScript. */
+:root{--gv-pink:#ff8bd8;--gv-pink2:#ff4fa3;--gv-bg:#100611}
+body{background:radial-gradient(circle at 10% 0%,rgba(255,139,216,.24),transparent 35%),radial-gradient(circle at 90% 10%,rgba(216,140,255,.18),transparent 30%),var(--gv-bg)!important;color:#fff4fc!important}
+.card,.shop-item,.enemy-card,.book-item,.card-item,.pass-tier{border-color:rgba(255,139,216,.24)!important;background:linear-gradient(180deg,rgba(55,18,64,.95),rgba(25,8,31,.97))!important}
+.btn-primary,.click-area,.tab-btn.active,.sub-tab-btn.active{background:linear-gradient(135deg,var(--gv-pink),var(--gv-pink2))!important;border-color:#ffb5e6!important;color:#260b2c!important}
+.card-title{border-left-color:var(--gv-pink)!important}.points,.upgrade-price,.shop-price,.mode-label{color:#ff9cdd!important}
+.level-bar,.exp-bar,.fatigue-progress{background:linear-gradient(90deg,var(--gv-pink),var(--gv-pink2))!important}
+#arenaOverlay{background:radial-gradient(circle,#32113b,#08030a)!important}#arenaCanvas{border-color:var(--gv-pink)!important;box-shadow:0 0 30px rgba(255,139,216,.25)}
