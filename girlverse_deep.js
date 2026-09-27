@@ -87,6 +87,13 @@ try{
  window.getObesityStageName=function(){if(typeof obesityPoints!=="number"||obesityPoints<20)return null;if(obesityPoints<40)return"Сладкая ярость I";if(obesityPoints<60)return"Сладкая ярость II";return"Сладкая ярость III"}
 }catch(_){}
 function markNewCard(c){if(!c)return c;const rev=new Map();nameMap.forEach((v,k)=>rev.set(v,k));if(!c.originalName&&!PROMO.has(c.name)&&rev.has(c.name))c.originalName=rev.get(c.name);return c}
+function patchSpecialBosses(){
+ try{
+  if(typeof window.startLivingStoneFight==="function"&&!GV.stoneWrapped){const old=window.startLivingStoneFight;window.startLivingStoneFight=function(){old.apply(this,arguments);if(typeof livingStoneBossMaxHp==="number"){livingStoneBossMaxHp=Math.max(1,Math.floor(livingStoneBossMaxHp*.01));livingStoneBossHp=livingStoneBossMaxHp}};GV.stoneWrapped=true}
+  if(typeof window.startWaystarFight==="function"&&!GV.waystarWrapped){const old=window.startWaystarFight;window.startWaystarFight=function(){old.apply(this,arguments);if(typeof waystarBossMaxHp==="number"){waystarBossMaxHp=Math.max(1,Math.floor(waystarBossMaxHp*.01));waystarBossHp=waystarBossMaxHp}};GV.waystarWrapped=true}
+  if(typeof window.startRogerWhitebeardFight==="function"&&!GV.rwbWrapped){const old=window.startRogerWhitebeardFight;window.startRogerWhitebeardFight=function(){old.apply(this,arguments);if(typeof roger!=="undefined"&&roger){roger.hp=Math.max(1,Math.floor(roger.hp*.01));roger.maxHp=roger.hp}if(typeof whitebeard!=="undefined"&&whitebeard){whitebeard.hp=Math.max(1,Math.floor(whitebeard.hp*.01));whitebeard.maxHp=whitebeard.hp}};GV.rwbWrapped=true}
+ }catch(_){}
+}
 function patchBossScaling(){
  try{
   if(typeof window.generateEnemy==="function"&&!GV.enemyWrapped){
@@ -134,7 +141,7 @@ function renameVisibleText(){
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),a=[];while(w.nextNode())a.push(w.currentNode);
  a.forEach(n=>{let s=n.nodeValue;if(!s||!s.trim())return;
   s=s.replace(/Multiverse Staple/gi,"GIRLVERSE BATTLE").replace(/МУЛЬТИВЕРС ПАСС/gi,"GIRLVERSE PASS").replace(/Мультиверс/gi,"Girlverse").replace(/Перерождение/gi,"Трансформация").replace(/перерождение/gi,"трансформация").replace(/Ребиртх/gi,"Трансформация").replace(/ребиртх/gi,"трансформация").replace(/Ребёрн/gi,"Трансформация").replace(/Реберн/gi,"Трансформация").replace(/Ожирение/gi,"Сладкая ярость").replace(/ожирение/gi,"сладкая ярость");
-  nameMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});bossMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});
+  nameMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});bossMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});try{if(bossTemplates[200])s=s.replace(/ЖИВОЙ КАМЕНЬ/gi,bossTemplates[200].name);if(bossTemplates[500])s=s.replace(/ПУТЕВОДНАЯ ЗВЕЗДА/gi,bossTemplates[500].name);if(bossTemplates[1000])s=s.replace(/РОДЖЕР VS БЕЛОУС/gi,bossTemplates[1000].name)}catch(_){}
   if(s!==n.nodeValue)n.nodeValue=s
  });
  const t=document.querySelector("title");if(t)t.textContent="GIRLVERSE BATTLE";
@@ -176,8 +183,8 @@ function startAuto(){
 window.girlverseReward=function(){if(Date.now()-rewardHandledAt<1000)return;rewardHandledAt=Date.now();startAuto()};
 window.onGirlverseReward=window.girlverseReward;
 window.addEventListener("rewardEarned",window.girlverseReward);
-function boot(){addTheme();migrateCards();patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
+function boot(){addTheme();migrateCards();patchSpecialBosses();patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-setInterval(function(){patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
+setInterval(function(){patchSpecialBosses();patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
 GV.nameMap=nameMap;GV.bossMap=bossMap;GV.promoCharacters=Array.from(PROMO);
 })();
