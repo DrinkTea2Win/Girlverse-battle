@@ -87,6 +87,13 @@ try{
  window.getObesityStageName=function(){if(typeof obesityPoints!=="number"||obesityPoints<20)return null;if(obesityPoints<40)return"Сладкая ярость I";if(obesityPoints<60)return"Сладкая ярость II";return"Сладкая ярость III"}
 }catch(_){}
 function markNewCard(c){if(!c)return c;const rev=new Map();nameMap.forEach((v,k)=>rev.set(v,k));if(!c.originalName&&!PROMO.has(c.name)&&rev.has(c.name))c.originalName=rev.get(c.name);return c}
+function patchBossScaling(){
+ try{
+  if(typeof window.generateEnemy==="function"&&!GV.enemyWrapped){
+   const old=window.generateEnemy;window.generateEnemy=function(){old.apply(this,arguments);if(typeof currentEnemy!=="undefined"&&currentEnemy&&currentEnemy.isBoss&&!currentEnemy.gvBossScaled){const templ=typeof bossTemplates!=="undefined"&&bossTemplates[wave];if(!templ){currentEnemy.hp=Math.max(1,Math.floor(currentEnemy.hp*.01));currentEnemy.maxHp=currentEnemy.hp;currentEnemy.damage=Math.max(1,Math.floor(currentEnemy.damage*.01))}currentEnemy.gvBossScaled=true;try{if(typeof renderEnemy==="function")renderEnemy()}catch(_){} }};GV.enemyWrapped=true
+  }
+ }catch(_){}
+}
 function patchCardCreation(){
  try{
   if(typeof window.createCardFromTemplate==="function"&&!GV.cardTemplateWrapped){const old=window.createCardFromTemplate;window.createCardFromTemplate=function(tm,r){return markNewCard(old.apply(this,arguments))};GV.cardTemplateWrapped=true}
@@ -169,8 +176,8 @@ function startAuto(){
 window.girlverseReward=function(){if(Date.now()-rewardHandledAt<1000)return;rewardHandledAt=Date.now();startAuto()};
 window.onGirlverseReward=window.girlverseReward;
 window.addEventListener("rewardEarned",window.girlverseReward);
-function boot(){addTheme();migrateCards();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
+function boot(){addTheme();migrateCards();patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-setInterval(function(){patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
+setInterval(function(){patchBossScaling();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
 GV.nameMap=nameMap;GV.bossMap=bossMap;GV.promoCharacters=Array.from(PROMO);
 })();
