@@ -34,10 +34,11 @@ function migrateCards(){
   if(!c||PROMO.has(c.name))return;
   if(!c.originalName&&nameMap.has(c.name))c.originalName=c.name;
   if(c.originalName&&nameMap.has(c.originalName))c.name=nameMap.get(c.originalName);
-  if(c.originalName&&c.originalName!=="Пельмешка"&&c.originalName!=="DrinkTea2Win"){
+  if(c.originalName&&c.originalName!=="Пельмешка"&&c.originalName!=="DrinkTea2Win"&&!c.gvScaled){
    if(typeof c.damage==="number")c.damage=Math.max(1,Math.floor(c.damage*.1));
    if(typeof c.hp==="number")c.hp=Math.max(1,Math.floor(c.hp*.1));
    c.universe="Girlverse";
+   c.gvScaled=true;
   }
  })
 }
@@ -85,6 +86,13 @@ try{
  }
  window.getObesityStageName=function(){if(typeof obesityPoints!=="number"||obesityPoints<20)return null;if(obesityPoints<40)return"Сладкая ярость I";if(obesityPoints<60)return"Сладкая ярость II";return"Сладкая ярость III"}
 }catch(_){}
+function markNewCard(c){if(!c)return c;const rev=new Map();nameMap.forEach((v,k)=>rev.set(v,k));if(!c.originalName&&!PROMO.has(c.name)&&rev.has(c.name))c.originalName=rev.get(c.name);return c}
+function patchCardCreation(){
+ try{
+  if(typeof window.createCardFromTemplate==="function"&&!GV.cardTemplateWrapped){const old=window.createCardFromTemplate;window.createCardFromTemplate=function(tm,r){return markNewCard(old.apply(this,arguments))};GV.cardTemplateWrapped=true}
+  if(typeof window.createCard==="function"&&!GV.cardWrapped){const old=window.createCard;window.createCard=function(){return markNewCard(old.apply(this,arguments))};GV.cardWrapped=true}
+ }catch(_){}
+}
 function patchUpgrades(){try{if(typeof upgrades!=="undefined"&&upgrades.abilityPower){upgrades.abilityPower.reqLevel=5;upgrades.abilityPower.name="✨ Супер-шанс"}}catch(_){}}
 try{
  if(typeof window.getMainCard==="function"&&!GV.mainCardWrapped){
@@ -119,6 +127,7 @@ function renameVisibleText(){
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),a=[];while(w.nextNode())a.push(w.currentNode);
  a.forEach(n=>{let s=n.nodeValue;if(!s||!s.trim())return;
   s=s.replace(/Multiverse Staple/gi,"GIRLVERSE BATTLE").replace(/МУЛЬТИВЕРС ПАСС/gi,"GIRLVERSE PASS").replace(/Мультиверс/gi,"Girlverse").replace(/Перерождение/gi,"Трансформация").replace(/перерождение/gi,"трансформация").replace(/Ребиртх/gi,"Трансформация").replace(/ребиртх/gi,"трансформация").replace(/Ребёрн/gi,"Трансформация").replace(/Реберн/gi,"Трансформация").replace(/Ожирение/gi,"Сладкая ярость").replace(/ожирение/gi,"сладкая ярость");
+  nameMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});bossMap.forEach((v,k)=>{if(k&&k!==v)s=s.split(k).join(v)});
   if(s!==n.nodeValue)n.nodeValue=s
  });
  const t=document.querySelector("title");if(t)t.textContent="GIRLVERSE BATTLE";
@@ -160,8 +169,8 @@ function startAuto(){
 window.girlverseReward=function(){if(Date.now()-rewardHandledAt<1000)return;rewardHandledAt=Date.now();startAuto()};
 window.onGirlverseReward=window.girlverseReward;
 window.addEventListener("rewardEarned",window.girlverseReward);
-function boot(){addTheme();migrateCards();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
+function boot(){addTheme();migrateCards();patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers();try{if(typeof renderMyCards==="function")renderMyCards()}catch(_){}try{if(typeof renderInventory==="function")renderInventory()}catch(_){}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-setInterval(function(){patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
+setInterval(function(){patchCardCreation();patchUpgrades();renameVisibleText();addAutoBattle();addFairyMarkers()},1200);
 GV.nameMap=nameMap;GV.bossMap=bossMap;GV.promoCharacters=Array.from(PROMO);
 })();
